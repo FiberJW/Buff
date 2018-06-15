@@ -9,6 +9,7 @@ import PlatformSelect from "./screens/PlatformSelect";
 import ConfirmPlatform from "./screens/ConfirmPlatform";
 import ChooseGoalKD from "./screens/ChooseGoalKD";
 import ChooseTargetDate from "./screens/ChooseTargetDate";
+import Stats from "./screens/Stats";
 
 const Navigator = createStackNavigator(
   {
@@ -16,11 +17,13 @@ const Navigator = createStackNavigator(
     PlatformSelect,
     ConfirmPlatform,
     ChooseGoalKD,
-    ChooseTargetDate
+    ChooseTargetDate,
+    Stats
   },
   {
     initialRouteName: "Entry",
-    headerMode: "none"
+    headerMode: "none",
+    cardStyle: { shadowRadius: 0, shadowColor: "transparent" }
   }
 );
 
@@ -53,12 +56,15 @@ export default class App extends React.Component {
     }
 
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: colors.background,
+          paddingTop: StatusBar.currentHeight
+        }}
+      >
         <StatusBar
-          barStyle={Platform.select({
-            ios: "dark-content",
-            android: "light-content"
-          })}
+          barStyle="light-content"
           backgroundColor={colors.background}
         />
         <View style={styles.container}>

@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Alert,
   Keyboard,
   FlatList,
   ScrollView
@@ -15,7 +16,8 @@ import {
 import { LinearGradient } from "expo";
 import colors from "../colors";
 import assets from "../assets";
-import Carousel from "react-native-snap-carousel";
+import DateTimePicker from "react-native-modal-datetime-picker";
+import moment from "moment";
 
 const ranges = [
   {
@@ -45,10 +47,24 @@ const ranges = [
   }
 ];
 
-export default class ChooseGoalKDScreen extends Component {
+export default class ChooseTargetDateScreen extends Component {
   state = {
-    activeSlide: 0
+    isDateTimePickerVisible: false,
+    date: moment()
+      .add(1, "week")
+      .utc()
+      .format()
   };
+
+  _showDateTimePicker = () => this.setState({ isDateTimePickerVisible: true });
+
+  _hideDateTimePicker = () => this.setState({ isDateTimePickerVisible: false });
+
+  _handleDatePicked = date => {
+    this.setState({ date });
+    this._hideDateTimePicker();
+  };
+
   render() {
     let kd = this.props.navigation.getParam("kd", 2.0);
 
@@ -60,6 +76,15 @@ export default class ChooseGoalKDScreen extends Component {
           }?`.toUpperCase()}
         </Text>
 
+        <TouchableOpacity
+          onPress={this._showDateTimePicker}
+          style={styles.dateTouchable}
+        >
+          <Text style={styles.date}>
+            {moment(this.state.date).format("MMMM Do YYYY")}
+          </Text>
+        </TouchableOpacity>
+
         <View
           style={{
             position: "absolute",
@@ -70,11 +95,23 @@ export default class ChooseGoalKDScreen extends Component {
         >
           <TouchableOpacity
             style={styles.buttonContainer}
-            onPress={() => this.props.navigation.navigate("ChooseTargetDate")}
+            onPress={() => {
+              Alert.alert(
+                "complete your daily goal to reach your goal k/d on time!".toUpperCase(),
+                null,
+                [{ text: "👌", onPress: () => console.log("OK Pressed") }]
+              );
+              this.props.navigation.navigate("Stats");
+            }}
           >
-            <Text style={styles.buttonText}>CONTINUE</Text>
+            <Text style={styles.buttonText}>SHOW ME HOW</Text>
           </TouchableOpacity>
         </View>
+        <DateTimePicker
+          isVisible={this.state.isDateTimePickerVisible}
+          onConfirm={this._handleDatePicked}
+          onCancel={this._hideDateTimePicker}
+        />
       </View>
     );
   }
@@ -99,12 +136,16 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   skin: { height: 300, alignSelf: "center" },
-  kdText: {
-    paddingTop: 32,
+  date: {
+    paddingVertical: 8,
+    paddingHorizontal: 32,
     textAlign: "center",
-    fontSize: 36,
+    fontSize: 24,
     color: "white",
-    fontFamily: "Josefin Sans SemiBold"
+    fontFamily: "Inter UI"
+  },
+  dateTouchable: {
+    backgroundColor: "rgba(0,0,0,0.15)"
   },
   buttonContainer: {
     borderRadius: 12,

@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Platform,
   Keyboard
 } from "react-native";
 import { LinearGradient } from "expo";
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     position: "absolute",
     color: "white",
-    top: 16,
+    top: Platform.OS === "ios" ? 16 : 0,
     left: 16
   },
   wickInABox: {
