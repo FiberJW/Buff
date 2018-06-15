@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from "expo";
 import colors from "../colors";
 import assets from "../assets";
+import State from "../State";
 
 export default class ConfirmPlatformScreen extends Component {
   state = { keyboardIsVisible: false };
@@ -55,7 +56,10 @@ export default class ConfirmPlatformScreen extends Component {
         >
           <TouchableOpacity
             style={styles.buttonContainer}
-            onPress={() => this.props.navigation.navigate("ChooseGoalKD")}
+            onPress={() => {
+              State.platform = platform;
+              this.props.navigation.navigate("ChooseGoalKD");
+            }}
           >
             <Text style={styles.buttonText}>CONFIRM</Text>
           </TouchableOpacity>

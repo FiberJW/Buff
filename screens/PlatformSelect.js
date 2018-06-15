@@ -42,7 +42,7 @@ export default class PlatformSelectScreen extends Component {
   };
 
   render() {
-    const linkedPLatforms = ["pc", "xb1", "ps4"];
+    const linkedPLatforms = this.props.navigation.getParam("validPlatforms");
 
     return (
       <View style={styles.container}>
@@ -52,7 +52,7 @@ export default class PlatformSelectScreen extends Component {
 
         {linkedPLatforms.map((p, i) => {
           let source;
-          switch (p) {
+          switch (p.name) {
             case "pc":
               source = assets.images.pc;
               break;
@@ -70,7 +70,7 @@ export default class PlatformSelectScreen extends Component {
             <TouchableOpacity
               onPress={() =>
                 this.props.navigation.navigate("ConfirmPlatform", {
-                  platform: p
+                  platform: p.name
                 })
               }
               key={i}

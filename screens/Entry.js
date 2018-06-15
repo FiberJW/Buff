@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -13,9 +14,11 @@ import {
 import { LinearGradient } from "expo";
 import colors from "../colors";
 import assets from "../assets";
+import State from "../State";
+import { inject, observer } from "mobx-react";
 
-export default class EntryScreen extends Component {
-  state = { keyboardIsVisible: false };
+class EntryScreen extends Component {
+  state = { keyboardIsVisible: false, nickname: "" };
 
   componentDidMount() {
     this.keyboardDidShowListener = Keyboard.addListener(
@@ -70,11 +73,59 @@ export default class EntryScreen extends Component {
               style={styles.textInput}
               underlineColorAndroid="transparent"
               placeholder="Enter Epic nickname here"
+              onChangeText={nickname =>
+                (this.props.appState.nickname = nickname.trim())
+              }
               placeholderTextColor="rgba(255,255,255,0.3)"
             />
             <TouchableOpacity
               style={styles.buttonContainer}
-              onPress={() => this.props.navigation.navigate("PlatformSelect")}
+              onPress={async () => {
+                if (this.props.appState.nickname === "") {
+                  return;
+                }
+                try {
+                  const response = await fetch(
+                    `https://fortnite.y3n.co/v2/player/${
+                      this.props.appState.nickname
+                    }`,
+                    {
+                      headers: {
+                        "User-Agent": "Buff",
+                        "X-Key": "PXvX3GV0H82xqcZES4sT"
+                      },
+                      method: "GET",
+                      mode: "cors"
+                    }
+                  );
+                  const {
+                    br: {
+                      stats: { pc, ps4, xb1 }
+                    },
+                    displayName
+                  } = await response.json();
+                  const validPlatforms = [
+                    { name: "pc", stats: pc },
+                    { name: "ps4", stats: ps4 },
+                    { name: "xb1", stats: xb1 }
+                  ].filter(o => Boolean(o.stats));
+
+                  if (validPlatforms.length == 0) {
+                    Alert.alert("Error", "This account doesn't exist.");
+                    return;
+                  } else if (validPlatforms.length > 1) {
+                    this.props.navigation.navigate("PlatformSelect", {
+                      validPlatforms
+                    });
+                  } else {
+                    this.props.appState.platform = validPlatforms[0].name;
+                    this.props.appState.stats = validPlatforms[0].stats;
+                    this.props.navigation.navigate("ChooseGoalKD");
+                  }
+                } catch (e) {
+                  alert(e);
+                }
+              }}
             >
               <Text style={styles.buttonText}>ENTER</Text>
             </TouchableOpacity>
@@ -84,6 +135,8 @@ export default class EntryScreen extends Component {
     );
   }
 }
+
+export default inject("appState")(observer(EntryScreen));
 
 const styles = StyleSheet.create({
   container: {

@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import React from "react";
 import { Font, AppLoading, Asset } from "expo";
 import { StyleSheet, Text, View, StatusBar, Platform } from "react-native";
@@ -9,7 +10,10 @@ import PlatformSelect from "./screens/PlatformSelect";
 import ConfirmPlatform from "./screens/ConfirmPlatform";
 import ChooseGoalKD from "./screens/ChooseGoalKD";
 import ChooseTargetDate from "./screens/ChooseTargetDate";
+import ChangeSettings from "./screens/ChangeSettings";
 import Stats from "./screens/Stats";
+import { observer, Provider } from "mobx-react";
+import State from "./State";
 
 const Navigator = createStackNavigator(
   {
@@ -18,6 +22,7 @@ const Navigator = createStackNavigator(
     ConfirmPlatform,
     ChooseGoalKD,
     ChooseTargetDate,
+    ChangeSettings,
     Stats
   },
   {
@@ -27,7 +32,7 @@ const Navigator = createStackNavigator(
   }
 );
 
-export default class App extends React.Component {
+class App extends React.Component {
   state = {
     isReady: false
   };
@@ -68,12 +73,16 @@ export default class App extends React.Component {
           backgroundColor={colors.background}
         />
         <View style={styles.container}>
-          <Navigator persistenceKey="exponium" />
+          <Provider appState={State}>
+            <Navigator persistenceKey="jw" />
+          </Provider>
         </View>
       </SafeAreaView>
     );
   }
 }
+
+export default observer(App);
 
 const styles = StyleSheet.create({
   container: {

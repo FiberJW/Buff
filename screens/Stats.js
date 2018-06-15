@@ -9,11 +9,15 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Keyboard,
-  ScrollView
+  Alert,
+  ScrollView,
+  ActivityIndicator
 } from "react-native";
 import { LinearGradient } from "expo";
 import colors from "../colors";
 import assets from "../assets";
+import { observer, inject } from "mobx-react";
+import moment from "moment";
 
 const MatchType = ({ type, active, onPress }) => (
   <TouchableOpacity
@@ -54,23 +58,68 @@ const Stat = ({ name, value }) => (
   </View>
 );
 
-export default class StatsScreen extends Component {
-  state = { matchType: "solo" };
+class StatsScreen extends Component {
+  state = { matchType: "solo", displayName: "" };
+
+  async componentDidMount() {
+    try {
+      const response = await fetch(
+        `https://fortnite.y3n.co/v2/player/${this.props.appState.nickname}`,
+        {
+          headers: {
+            "User-Agent": "Buff",
+            "X-Key": "PXvX3GV0H82xqcZES4sT"
+          },
+          method: "GET", // *GET, POST, PUT, DELETE, etc.
+          mode: "cors" // no-cors, cors, *same-origin
+        }
+      );
+
+      const {
+        br: { stats },
+        displayName
+      } = await response.json();
+      this.setState({ displayName });
+      this.props.appState.stats = stats[this.props.appState.platform];
+    } catch (e) {
+      Alert.alert("An Error Occurred While Fetching Stats", e);
+    }
+  }
+
   render() {
-    return (
+    const overallKD =
+      this.props.appState.stats &&
+      this.props.appState.stats.all.kills /
+        (this.props.appState.stats.all.matchesPlayed -
+          this.props.appState.stats.all.wins);
+
+    return this.props.appState.stats ? (
       <View behavior="padding" style={styles.container}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.nickName}>FIBERJW</Text>
-            <Text style={styles.overallStat}>TOTAL ELIMINATIONS: {495}</Text>
-            <Text style={styles.overallStat}>MATCHES PLAYED: {5}</Text>
-            <Text style={styles.overallStat}>OVERALL K/D: {99}</Text>
+            <Text style={styles.nickName}>{this.state.displayName}</Text>
+            <Text style={styles.overallStat}>
+              TOTAL ELIMINATIONS: {this.props.appState.stats.all.kills}
+            </Text>
+            <Text style={styles.overallStat}>
+              MATCHES PLAYED: {this.props.appState.stats.all.matchesPlayed}
+            </Text>
+            <Text style={styles.overallStat}>
+              OVERALL K/D:{" "}
+              {overallKD >= 10
+                ? overallKD.toPrecision(4)
+                : overallKD.toPrecision(3)}
+            </Text>
           </View>
-          <Image
-            source={assets.images.avatar4}
-            resizeMode="contain"
-            style={styles.avatar}
-          />
+          <TouchableOpacity
+            onPress={() => this.props.navigation.navigate("ChangeSettings")}
+          >
+            <Image
+              source={assets.images[`avatar${this.props.appState.kd}`]}
+              resizeMode="contain"
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
         </View>
         <ScrollView
           style={{ flex: 1 }}
@@ -95,18 +144,28 @@ export default class StatsScreen extends Component {
             />
             <MatchType
               type="squad"
-              active={this.state.matchType === "squads"}
+              active={this.state.matchType === "squad"}
               onPress={() => {
-                this.setState({ matchType: "squads" });
+                this.setState({ matchType: "squad" });
               }}
             />
           </View>
 
           <View style={styles.statsBorder}>
             <View style={styles.statsContainer}>
-              <Stat name="wins" value={15} />
-              <Stat name="Eliminations" value={128} />
-              <Stat name="K/D" value={97} />
+              {Object.keys(this.props.appState.stats[this.state.matchType])
+                .filter(k => {
+                  if (k === "lastMatch" || k === "minutesPlayed" || k == "tpm")
+                    return false;
+                  return true;
+                })
+                .map((k, i) => (
+                  <Stat
+                    name={k}
+                    key={i}
+                    value={this.props.appState.stats[this.state.matchType][k]}
+                  />
+                ))}
             </View>
           </View>
           <View
@@ -148,7 +207,7 @@ export default class StatsScreen extends Component {
                   color: "white"
                 }}
               >
-                12 MATCHES
+                10 MATCHES
               </Text>
               <Text
                 style={{
@@ -158,11 +217,15 @@ export default class StatsScreen extends Component {
                   color: "white"
                 }}
               >
-                5 ELIMINATIONS/MATCH
+                {this.props.appState.kd + 2} ELIMINATIONS/MATCH
               </Text>
             </View>
           </View>
         </ScrollView>
+      </View>
+    ) : (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
       </View>
     );
   }
@@ -227,3 +290,5 @@ const styles = StyleSheet.create({
     padding: 16
   }
 });
+
+export default inject("appState")(observer(StatsScreen));

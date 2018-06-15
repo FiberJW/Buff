@@ -16,6 +16,7 @@ import { LinearGradient } from "expo";
 import colors from "../colors";
 import assets from "../assets";
 import Carousel from "react-native-snap-carousel";
+import State from "../State";
 
 const ranges = [
   {
@@ -94,13 +95,21 @@ export default class ChooseGoalKDScreen extends Component {
         >
           <TouchableOpacity
             style={styles.buttonContainer}
-            onPress={() =>
-              this.props.navigation.navigate("ChooseTargetDate", { kd })
-            }
+            onPress={() => {
+              State.kd = kd;
+              this.props.navigation.navigate("Stats");
+            }}
           >
             <Text style={styles.buttonText}>CONTINUE</Text>
           </TouchableOpacity>
         </View>
+        {this.state.activeSlide == 4 && (
+          <Image
+            source={assets.images.monkaS}
+            style={styles.monkaS}
+            resizeMode="contain"
+          />
+        )}
       </View>
     );
   }
@@ -149,5 +158,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "white",
     fontFamily: "Josefin Sans SemiBold"
-  }
+  },
+  monkaS: { position: "absolute", bottom: 0, left: 0, height: 72 }
 });

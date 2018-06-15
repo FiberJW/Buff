@@ -18,6 +18,7 @@ import colors from "../colors";
 import assets from "../assets";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import moment from "moment";
+import { observer, inject } from "mobx-react";
 
 const ranges = [
   {
@@ -47,7 +48,7 @@ const ranges = [
   }
 ];
 
-export default class ChooseTargetDateScreen extends Component {
+class ChooseTargetDateScreen extends Component {
   state = {
     isDateTimePickerVisible: false,
     date: moment()
@@ -66,7 +67,7 @@ export default class ChooseTargetDateScreen extends Component {
   };
 
   render() {
-    let kd = this.props.navigation.getParam("kd", 2.0);
+    let kd = this.props.appState.kd;
 
     return (
       <View style={styles.container}>
@@ -99,7 +100,7 @@ export default class ChooseTargetDateScreen extends Component {
               Alert.alert(
                 "complete your daily goal to reach your goal k/d on time!".toUpperCase(),
                 null,
-                [{ text: "👌", onPress: () => console.log("OK Pressed") }]
+                [{ text: "👌", onPress: () => null }]
               );
               this.props.navigation.navigate("Stats");
             }}
@@ -166,3 +167,5 @@ const styles = StyleSheet.create({
     fontFamily: "Josefin Sans SemiBold"
   }
 });
+
+export default inject("appState")(observer(ChooseTargetDateScreen));
