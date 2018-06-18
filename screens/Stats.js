@@ -93,6 +93,19 @@ class StatsScreen extends Component {
         (this.props.appState.stats.all.matchesPlayed -
           this.props.appState.stats.all.wins);
 
+    let elimsNeededToday = null;
+    let matchesToPlayToday = null;
+    if (this.props.appState.stats) {
+      elimsNeededToday = Math.ceil(
+        (this.props.appState.kd *
+          (this.props.appState.stats.all.matchesPlayed -
+            this.props.appState.stats.all.wins) -
+          this.props.appState.stats.all.kills) /
+          365
+      );
+      matchesToPlayToday = Math.ceil(elimsNeededToday / this.props.appState.kd);
+    }
+
     return this.props.appState.stats ? (
       <View behavior="padding" style={styles.container}>
         <View style={styles.header}>
@@ -207,7 +220,7 @@ class StatsScreen extends Component {
                   color: "white"
                 }}
               >
-                10 MATCHES
+                {matchesToPlayToday} MATCHES
               </Text>
               <Text
                 style={{
@@ -217,7 +230,8 @@ class StatsScreen extends Component {
                   color: "white"
                 }}
               >
-                {this.props.appState.kd + 2} ELIMINATIONS/MATCH
+                {Math.ceil(elimsNeededToday / matchesToPlayToday)}{" "}
+                ELIMINATIONS/MATCH
               </Text>
             </View>
           </View>
